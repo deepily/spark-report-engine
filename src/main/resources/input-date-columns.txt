@@ -1,0 +1,18 @@
+// columns in cvs file that need to be transformed from plain text to proper date columns
+p1000
+p1001
+p1002
+p1007
+p1100
+p1101
+p1102
+p1103
+p1104
+p1105
+p1107
+p1112
+p1113
+p1201
+p900
+p901
+//p3000

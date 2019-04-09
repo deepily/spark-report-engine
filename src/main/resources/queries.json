@@ -1,0 +1,1047 @@
+[{
+  "id":"F04p",
+  "type":"count",
+  "query":"_scfIw_ p918 = 1"
+},{
+  "id":"F04",
+  "type":"formula-concatenator",
+  "query":"F04p :: AND p900 <= _endAbc_ AND ( p901 >= _begAbc_ OR p901 _in_ )"
+},{
+  "id":"F05",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND p301 IN ( 1, 2, 3 )"
+},{
+  "id":"F06",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND p904 IN ( 1, 2, 3 )"
+},{
+  "id":"F07",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND p202 = 1"
+},{
+  "id":"F08",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND p808 IN ( 1, 2, 3, 4, 5 )"
+},{
+  "id":"F10",
+  "type":"count",
+  "query":"_scfIw_ ( p918 = 1 AND p900 <= _endAbc_ AND ( p901 >= _begAbc_ OR p901 _in_ ) ) OR ( p918 = 2 AND ( p1002 >= _begAbc_ OR p1007 >= _begAbc_ ) )"
+},{
+  "id":"F11",
+  "type":"formula-concatenator",
+  "query":"F10 :: AND p918 = 2"
+},{
+  "id":"F12",
+  "type":"formula-concatenator",
+  "query":"F11 :: AND p1101 >= _begAbc_"
+},{
+  "id":"F13",
+  "type":"formula-concatenator",
+  "query":"F11 :: AND p1100 >= _begAbc_"
+},{
+  "id":"F14",
+  "type":"formula-concatenator",
+  "query":"F11 :: AND p1103 >= _begAbc_"
+},{
+  "id":"F16",
+  "type":"count",
+  "query":"_scfIw_ p918 = 1 AND ( p1000 _inn_ OR p1001 _inn_ ) AND p900 <= _endAbc_ AND ( p901 >= _begAbc_ OR p901 _in_ )"
+},{
+  "id":"F17",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND p1102 _inn_"
+},{
+  "id":"F18",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND p1104 _inn_"
+},{
+  "id":"F19",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND p1105 _inn_"
+},{
+  "id":"F20",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND p1103 _inn_"
+},{
+  "id":"F21",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND p1112 _inn_"
+},{
+  "id":"F22",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND p1107 _inn_"
+},{
+  "id":"F23",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND p1113 _inn_"
+},{
+  "id":"F24",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND p1201 _inn_"
+},{
+  "id":"F27",
+  "type":"formula-concatenator",
+  "query":"F04p :: AND p923 = 00 AND p901 >= _begExit2q_ AND p901 <= _endExit2q_"
+},{
+  "id":"F26",
+  "type":"formula-concatenator",
+  "query":"F27 :: AND p1602 >= 1 AND p1602 <= 8"
+},{
+  "id":"F31",
+  "type":"formula-concatenator",
+  "query":"F04p :: AND p923 = 00 AND p901 >= _begExit4q_ AND p901 <= _endExit4q_"
+},{
+  "id":"F30",
+  "type":"formula-concatenator",
+  "query":"F31 :: AND p1606 >= 1 AND p1606 <= 8"
+},{
+  "id":"G05n",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND p301 > 0"
+},{
+  "id":"G05",
+  "type":"formula-division",
+  "query":"G05n/F04"
+},{
+  "id":"G06n",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND p904 IN ( 1, 2, 3 )"
+},{
+  "id":"G06",
+  "type":"formula-division",
+  "query":"G06n/F04"
+},{
+  "id":"G07n",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND p202 = 1"
+},{
+  "id":"G07",
+  "type":"formula-division",
+  "query":"G07n/F04"
+},{
+  "id":"G08n",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND p808 IN ( 1, 2, 3, 4, 5 )"
+},{
+  "id":"G08",
+  "type":"formula-division",
+  "query":"G08n/F04"
+},{
+  "id":"G11n",
+  "type":"formula-concatenator",
+  "query":"F10 :: AND p918 = 2"
+},{
+  "id":"G11",
+  "type":"formula-division",
+  "query":"G11n/F10"
+},{
+  "id":"G12n",
+  "type":"formula-concatenator",
+  "query":"F11 :: AND p1101 >= _begAbc_"
+},{
+  "id":"G12",
+  "type":"formula-division",
+  "query":"G12n/F11"
+},{
+  "id":"G13n",
+  "type":"formula-concatenator",
+  "query":"F11 :: AND p1100 >= _begAbc_"
+},{
+  "id":"G13",
+  "type":"formula-division",
+  "query":"G13n/F11"
+},{
+  "id":"G14n",
+  "type":"formula-concatenator",
+  "query":"F11 :: AND p1103 >= _begAbc_"
+},{
+  "id":"G14",
+  "type":"formula-division",
+  "query":"G14n/F11"
+},{
+  "id":"G16n",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND ( p1000 _inn_ OR p1001 _inn_ )"
+},{
+  "id":"G16d",
+  "type":"formula-concatenator",
+  "query":"F04p :: AND ( p901 >= _begAbc_ OR p901 _inn_ )"
+},{
+  "id":"G16",
+  "type":"formula-division",
+  "query":"G16n/G16d"
+},{
+  "id":"G17n",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND ( p1102 _inn_ )"
+},{
+  "id":"G17",
+  "type":"formula-division",
+  "query":"G17n/F16"
+},{
+  "id":"G18n",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND ( p1104 _inn_ )"
+},{
+  "id":"G18",
+  "type":"formula-division",
+  "query":"G18n/F16"
+},{
+  "id":"G19n",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND ( p1102 _inn_ )"
+},{
+  "id":"G19",
+  "type":"formula-division",
+  "query":"G19n/F16"
+},{
+  "id":"G20n",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND ( p1102 _inn_ )"
+},{
+  "id":"G20",
+  "type":"formula-division",
+  "query":"G20n/F16"
+},{
+  "id":"G21n",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND ( p1112 _inn_ )"
+},{
+  "id":"G21",
+  "type":"formula-division",
+  "query":"G21n/F16"
+},{
+  "id":"G22n",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND ( p1107 _inn_ )"
+},{
+  "id":"G22",
+  "type":"formula-division",
+  "query":"G22n/F16"
+},{
+  "id":"G23n",
+  "type":"formula-concatenator",
+  "query":"F16 :: AND ( p1113 _inn_ )"
+},{
+  "id":"G23",
+  "type":"formula-division",
+  "query":"G23n/F16"
+},{
+  "id":"G24n",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND ( p1201 _inn_ )"
+},{
+  "id":"G24",
+  "type":"formula-division",
+  "query":"G24n/F04"
+},{
+  "id":"G28",
+  "type":"formula-division",
+  "query":"F26/F27"
+},{
+  "id":"G29",
+  "type":"median",
+  "query":"_swfIw_ p918 = 1 AND p1704 > 0 AND p1704 < 999999.99 AND p901 >= _begExit2q_ AND p901 <= _endExit2q_ AND p923 = 00"
+},{
+  "id":"G32",
+  "type":"formula-division",
+  "query":"F30/F31"
+},{
+  "id":"H04",
+  "type":"formula-concatenator",
+  "query":"F04p :: AND p401 IN ( 1, 2, 3, 5 ) AND p900 <= _endAbc_ AND ( p901 >= _begAbc_ OR p901 _in_ )"
+},{
+  "id":"H05",
+  "type":"formula-concatenator",
+  "query":"H04 :: AND p301 > 0"
+},{
+  "id":"H06",
+  "type":"formula-concatenator",
+  "query":"H04 :: AND p904 IN ( 1, 2, 3 )"
+},{
+  "id":"H07",
+  "type":"formula-concatenator",
+  "query":"H04 :: AND p202 = 1"
+},{
+  "id":"H08",
+  "type":"formula-concatenator",
+  "query":"H04 :: AND p808 IN ( 1, 2, 3, 4, 5 )"
+},{
+  "id":"H10",
+  "type":"count",
+  "query":"_scfIw_ p918 IN ( 1, 2 ) AND p401 IN ( 1, 2, 3, 5 ) AND p900 <= _endAbc_ AND ( p901 >= _begAbc_ OR p901 _in_ )"
+},{
+  "id":"H11",
+  "type":"count",
+  "query":"_scfIw_ p918 = 2 AND p401 IN ( 1, 2, 3, 5 ) AND ( p1002 >= _begAbc_ OR p1007 >= _begAbc_ )"
+},{
+  "id":"H12",
+  "type":"formula-concatenator",
+  "query":"H11 :: AND p1101 >= _begAbc_"
+},{
+  "id":"H13",
+  "type":"formula-concatenator",
+  "query":"H11 :: AND p1100 >= _begAbc_"
+},{
+  "id":"H14",
+  "type":"formula-concatenator",
+  "query":"H11 :: AND p1103 >= _begAbc_"
+},{
+  "id":"H16",
+  "type":"formula-concatenator",
+  "query":"H10 :: AND p918 = 1 AND ( p1000 _inn_ OR p1001 _inn_ )"
+},{
+  "id":"H17",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1102 _inn_"
+},{
+  "id":"H18",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1104 _inn_"
+},{
+  "id":"H19",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1105 _inn_"
+},{
+  "id":"H20",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1103 _inn_"
+},{
+  "id":"H21",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1112 _inn_"
+},{
+  "id":"H22",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1107 _inn_"
+},{
+  "id":"H23",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1113 _inn_"
+},{
+  "id":"H24",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1201 _inn_"
+},{
+  "id":"H27p",
+  "type":"count",
+  "query":"_scfIw_ p918 = 1 AND p401 IN ( 1, 2, 3, 5 )"
+},{
+  "id":"H27",
+  "type":"formula-concatenator",
+  "query":"H27p :: AND p901 >= _begExit2q_ AND p901 <= _endExit2q_ AND p923 = 00"
+},{
+  "id":"H26",
+  "type":"formula-concatenator",
+  "query":"H27 :: AND p1602 >= 1 AND p1602 <= 8"
+},{
+  "id":"H31",
+  "type":"formula-concatenator",
+  "query":"H27p :: AND p901 >= _begExit4q_ AND p901 <= _endExit4q_ AND p923 = 00"
+},{
+  "id":"H30",
+  "type":"formula-concatenator",
+  "query":"H31 :: AND p1606 >= 1 AND p1606 <= 8"
+},{
+  "id":"I04p",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND p401 IN ( 1, 2, 3, 5 ) "
+},{
+  "id":"I04",
+  "type":"formula-division",
+  "query":"I04p/F04"
+},{
+  "id":"I05p",
+  "type":"formula-concatenator",
+  "query":"H04 :: AND p301 > 0 "
+},{
+  "id":"I05",
+  "type":"formula-division",
+  "query":"I05p/H04"
+},{
+  "id":"I06p",
+  "type":"formula-concatenator",
+  "query":"H04 :: AND p904 IN ( 1, 2, 3 )"
+},{
+  "id":"I06",
+  "type":"formula-division",
+  "query":"I06p/H04"
+},{
+  "id":"I07p",
+  "type":"formula-concatenator",
+  "query":"H04 :: AND p202 = 1"
+},{
+  "id":"I07",
+  "type":"formula-division",
+  "query":"I07p/H04"
+},{
+  "id":"I08p",
+  "type":"formula-concatenator",
+  "query":"H04 :: AND p808 IN (1, 2, 3, 4, 5 )"
+},{
+  "id":"I08",
+  "type":"formula-division",
+  "query":"I08p/H04"
+},{
+  "id":"I10p",
+  "type":"formula-concatenator",
+  "query":"F10 :: AND p401 IN ( 1, 2, 3, 5 )"
+},{
+  "id":"I10",
+  "type":"formula-division",
+  "query":"I10p/H10"
+},{
+  "id":"I11p",
+  "type":"formula-concatenator",
+  "query":"F11 :: AND p401 IN ( 1, 2, 3, 5 )"
+},{
+  "id":"I11",
+  "type":"formula-division",
+  "query":"I11p/F11"
+},{
+  "id":"I12p",
+  "type":"formula-concatenator",
+  "query":"I11p :: AND p1101 >= _begAbc_"
+},{
+  "id":"I12",
+  "type":"formula-division",
+  "query":"I12p/F11"
+},{
+  "id":"I13p",
+  "type":"formula-concatenator",
+  "query":"I11p :: AND p1100 >= _begAbc_"
+},{
+  "id":"I13",
+  "type":"formula-division",
+  "query":"I13p/F11"
+},{
+  "id":"I14p",
+  "type":"formula-concatenator",
+  "query":"I11p :: AND p1103 >= _begAbc_"
+},{
+  "id":"I14",
+  "type":"formula-division",
+  "query":"I14p/F11"
+},{
+  "id":"I16p",
+  "type":"formula-concatenator",
+  "query":"H04 :: AND ( p1000 _inn_ OR p1001 _inn_ )"
+},{
+  "id":"I16",
+  "type":"formula-division",
+  "query":"I16p/H04"
+},{
+  "id":"I17p",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1102 _inn_"
+},{
+  "id":"I17",
+  "type":"formula-division",
+  "query":"I17p/H16"
+},{
+  "id":"I18p",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1104 _inn_"
+},{
+  "id":"I18",
+  "type":"formula-division",
+  "query":"I18p/H16"
+},{
+  "id":"I19p",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1105 _inn_"
+},{
+  "id":"I19",
+  "type":"formula-division",
+  "query":"I19p/H16"
+},{
+  "id":"I20p",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1103 _inn_"
+},{
+  "id":"I20",
+  "type":"formula-division",
+  "query":"I20p/H16"
+},{
+  "id":"I21p",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1112 _inn_"
+},{
+  "id":"I21",
+  "type":"formula-division",
+  "query":"I21p/H16"
+},{
+  "id":"I22p",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1107 _inn_"
+},{
+  "id":"I22",
+  "type":"formula-division",
+  "query":"I22p/H16"
+},{
+  "id":"I23p",
+  "type":"formula-concatenator",
+  "query":"H16 :: AND p1113 _inn_"
+},{
+  "id":"I23",
+  "type":"formula-division",
+  "query":"I23p/H16"
+},{
+  "id":"I24p",
+  "type":"formula-concatenator",
+  "query":"H04 :: AND p1201 _inn_"
+},{
+  "id":"I24",
+  "type":"formula-division",
+  "query":"I24p/H04"
+},{
+  "id":"I28",
+  "type":"formula-division",
+  "query":"H26/H27"
+},{
+  "id":"I29",
+  "type":"median",
+  "query":"_swfIw_ p918 = 1 AND p401 IN ( 1, 2, 3, 5 ) AND p1704 > 0 AND p1704 < 999999.99 AND p901 >= _begExit2q_ AND p901 <= _endExit2q_ AND p923 = 00"
+},{
+  "id":"I32",
+  "type":"formula-division",
+  "query":"H30/H31"
+},{
+  "id":"J05",
+  "type":"formula-concatenator",
+  "query":"F04p :: AND p301 > 0"
+},{
+  "id":"J06",
+  "type":"formula-concatenator",
+  "query":"J05 :: AND p401 IN ( 1, 2, 3, 5 )"
+},{
+  "id":"J07",
+  "type":"formula-concatenator",
+  "query":"J05 :: AND p904 IN ( 1, 2, 3 )"
+},{
+  "id":"J08",
+  "type":"formula-concatenator",
+  "query":"J05 :: AND p808 IN ( 1, 2, 3, 4, 5 )"
+},{
+  "id":"J10",
+  "type":"count",
+  "query":"_scfIw_ p918 IN ( 1, 2 ) AND p301 > 0 AND p900 <= _endAbc_ AND ( p901 >= _begAbc_ OR p901 _in_ )"
+},{
+  "id":"J11",
+  "type":"count",
+  "query":"_scfIw_ p918 = 2 AND p301 > 0 AND ( p1002 >= _begAbc_ OR p1007 >= _begAbc_ )"
+},{
+  "id":"J12",
+  "type":"formula-concatenator",
+  "query":"J11 :: AND p1101 >= _begAbc_"
+},{
+  "id":"J13",
+  "type":"formula-concatenator",
+  "query":"J11 :: AND p1100 >= _begAbc_"
+},{
+  "id":"J14",
+  "type":"formula-concatenator",
+  "query":"J11 :: AND p1103 >= _begAbc_"
+},{
+  "id":"J16",
+  "type":"count",
+  "query":"_scfIw_ p918 = 1 AND p301 > 0 AND p900 <= _endAbc_ AND ( p901 >= _begAbc_ OR p901 _in_ ) AND ( p1000 _inn_ OR p1001 _inn_ )"
+},{
+  "id":"J17",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1102 _inn_"
+},{
+  "id":"J18",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1104 _inn_"
+},{
+  "id":"J19",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1105 _inn_"
+},{
+  "id":"J20",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1103 _inn_"
+},{
+  "id":"J21",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1112 _inn_"
+},{
+  "id":"J22",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1107 _inn_"
+},{
+  "id":"J23",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1113 _inn_"
+},{
+  "id":"J24",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1201 _inn_"
+},{
+  "id":"J27",
+  "type":"formula-concatenator",
+  "query":"F04p :: AND p301 > 0 AND p901 <= _endExit2q_ AND p901 >= _begExit2q_ AND p923 = 00"
+},{
+  "id":"J26",
+  "type":"formula-concatenator",
+  "query":"J27 :: AND p1602 >= 1 AND p1602 <= 8"
+},{
+  "id":"J31",
+  "type":"formula-concatenator",
+  "query":"F04p :: AND p301 > 0 AND p901 <= _endExit4q_ AND p901 >= _begExit4q_"
+},{
+  "id":"J30",
+  "type":"formula-concatenator",
+  "query":"J31 :: AND p1606 >= 1 AND p1606 <= 8"
+},{
+  "id":"K05n",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND p301 > 0"
+},{
+  "id":"K05",
+  "type":"formula-division",
+  "query":"K05n/F04"
+},{
+  "id":"K06n",
+  "type":"formula-concatenator",
+  "query":"J05 :: AND p401 IN ( 1, 2, 3, 5 )"
+},{
+  "id":"K06",
+  "type":"formula-division",
+  "query":"K06n/J05"
+},{
+  "id":"K07n",
+  "type":"formula-concatenator",
+  "query":"J05 :: AND p904 IN ( 1, 2, 3 )"
+},{
+  "id":"K07",
+  "type":"formula-division",
+  "query":"K07n/J05"
+},{
+  "id":"K08n",
+  "type":"formula-concatenator",
+  "query":"J05 :: AND p808 IN ( 1, 2, 3, 4, 5 )"
+},{
+  "id":"K08",
+  "type":"formula-division",
+  "query":"K08n/J05"
+},{
+  "id":"K10n",
+  "type":"formula-concatenator",
+  "query":"J10 :: AND p401 IN ( 1, 2, 3, 5 )"
+},{
+  "id":"K10",
+  "type":"formula-division",
+  "query":"K10n/J10"
+},{
+  "id":"K11n",
+  "type":"formula-concatenator",
+  "query":"F11 :: AND p301 > 0"
+},{
+  "id":"K11",
+  "type":"formula-division",
+  "query":"K11n/F11"
+},{
+  "id":"K12n",
+  "type":"formula-concatenator",
+  "query":"K11n :: AND p1101 >= _begAbc_"
+},{
+  "id":"K12",
+  "type":"formula-division",
+  "query":"K12n/F11"
+},{
+  "id":"K13n",
+  "type":"formula-concatenator",
+  "query":"K11n :: AND p1100 >= _begAbc_"
+},{
+  "id":"K13",
+  "type":"formula-division",
+  "query":"K13n/F11"
+},{
+  "id":"K14n",
+  "type":"formula-concatenator",
+  "query":"K11n :: AND p1103 >= _begAbc_"
+},{
+  "id":"K14",
+  "type":"formula-division",
+  "query":"K14n/F11"
+},{
+  "id":"K16n",
+  "type":"formula-concatenator",
+  "query":"J05 :: AND ( p1000 _inn_ OR p1001 _inn_ )"
+},{
+  "id":"K16",
+  "type":"formula-division",
+  "query":"K16n/J05"
+},{
+  "id":"K17n",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1102 _inn_"
+},{
+  "id":"K17",
+  "type":"formula-division",
+  "query":"K17n/J16"
+},{
+  "id":"K18n",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1104 _inn_"
+},{
+  "id":"K18",
+  "type":"formula-division",
+  "query":"K18n/J16"
+},{
+  "id":"K19n",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1105 _inn_"
+},{
+  "id":"K19",
+  "type":"formula-division",
+  "query":"K19n/J16"
+},{
+  "id":"K20n",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1103 _inn_"
+},{
+  "id":"K20",
+  "type":"formula-division",
+  "query":"K20n/J16"
+},{
+  "id":"K21n",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1112 _inn_"
+},{
+  "id":"K21",
+  "type":"formula-division",
+  "query":"K21n/J16"
+},{
+  "id":"K22n",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1107 _inn_"
+},{
+  "id":"K22",
+  "type":"formula-division",
+  "query":"K22n/J16"
+},{
+  "id":"K23n",
+  "type":"formula-concatenator",
+  "query":"J16 :: AND p1113 _inn_"
+},{
+  "id":"K23",
+  "type":"formula-division",
+  "query":"K23n/J16"
+},{
+  "id":"K24n",
+  "type":"formula-concatenator",
+  "query":"J05 :: AND p1201 _inn_"
+},{
+  "id":"K24",
+  "type":"formula-division",
+  "query":"K24n/J16"
+},{
+  "id":"K28",
+  "type":"formula-division",
+  "query":"J26/J27"
+},{
+  "id":"K29",
+  "type":"median",
+  "query":"_swfIw_ p918 = 1 AND p301 > 0 AND p1704 > 0 AND p1704 < 999999.99 AND p901 >= _begExit2q_ AND p901 <= _endExit2q_ AND p923 = 00"
+},{
+  "id":"K32",
+  "type":"formula-division",
+  "query":"J30/J31"
+},{
+  "id":"L04",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND p413 IN ( 1, 2 )"
+},{
+  "id":"L05",
+  "type":"formula-concatenator",
+  "query":"L04 :: AND p301 > 0"
+},{
+  "id":"L06",
+  "type":"formula-concatenator",
+  "query":"L04 :: AND p401 IN ( 1, 2, 3, 5 )"
+},{
+  "id":"L07",
+  "type":"formula-concatenator",
+  "query":"L04 :: AND p904 IN ( 1, 2, 3 )"
+},{
+  "id":"L08",
+  "type":"formula-concatenator",
+  "query":"L04 :: AND p808 IN ( 1, 2, 3, 4, 5 )"
+},{
+  "id":"L10",
+  "type":"count",
+  "query":"_scfIw_ p918 IN ( 1, 2 ) AND p900 <= _endAbc_ AND ( p901 >= _begAbc_ OR p901 _in_ )"
+},{
+  "id":"L11",
+  "type":"count",
+  "query":"_scfIw_ p918 = 2 AND p413 IN ( 1, 2 ) AND ( p1002 >= _begAbc_ OR p1007 >= _begAbc_ )"
+},{
+  "id":"L12",
+  "type":"formula-concatenator",
+  "query":"L11 :: AND p1101 >= _begAbc_"
+},{
+  "id":"L13",
+  "type":"formula-concatenator",
+  "query":"L11 :: AND p1100 >= _begAbc_"
+},{
+  "id":"L14",
+  "type":"formula-concatenator",
+  "query":"L11 :: AND p1103 >= _begAbc_"
+},{
+  "id":"L16",
+  "type":"formula-concatenator",
+  "query":"F04p :: AND p413 IN ( 1, 2 ) AND p900 <= _endAbc_ AND ( p901 >= _begAbc_ OR p901 _in_ ) AND ( p1000 _inn_ OR p1001 _inn_ )"
+},{
+  "id":"L17",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1102 _inn_"
+},{
+  "id":"L18",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1104 _inn_"
+},{
+  "id":"L19",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1105 _inn_"
+},{
+  "id":"L20",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1103 _inn_"
+},{
+  "id":"L21",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1112 _inn_"
+},{
+  "id":"L22",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1107 _inn_"
+},{
+  "id":"L23",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1113 _inn_"
+},{
+  "id":"L24",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1201 _inn_"
+},{
+  "id":"L27",
+  "type":"formula-concatenator",
+  "query":"F04p :: AND p413 IN ( 1, 2 ) AND p901 >= _begExit2q_ AND p901 <= _endExit2q_ AND p923 = 00"
+},{
+  "id":"L26",
+  "type":"formula-concatenator",
+  "query":"L27 :: AND p1602 >= 1 AND p1602 <= 8"
+},{
+  "id":"L31",
+  "type":"formula-concatenator",
+  "query":"F04p :: AND p413 IN ( 1, 2 ) AND p901 >= _begExit4q_ AND p901 <= _endExit4q_ AND 923 = 00"
+},{
+  "id":"L30",
+  "type":"formula-concatenator",
+  "query":"L31 :: AND p1606 >= 1 AND p1606 <= 8"
+},{
+  "id":"M04n",
+  "type":"formula-concatenator",
+  "query":"F04 :: AND p413 IN ( 1, 2 )"
+},{
+  "id":"M04",
+  "type":"formula-division",
+  "query":"M04n/F04"
+},{
+  "id":"M05n",
+  "type":"formula-concatenator",
+  "query":"L04 :: AND p301 > 0"
+},{
+  "id":"M05",
+  "type":"formula-division",
+  "query":"M05n/L04"
+},{
+  "id":"M06n",
+  "type":"formula-concatenator",
+  "query":"L04 :: AND p401 IN ( 1, 2, 3, 5 )"
+},{
+  "id":"M06",
+  "type":"formula-division",
+  "query":"M06n/L04"
+},{
+  "id":"M07n",
+  "type":"formula-concatenator",
+  "query":"L04 :: AND p904 IN ( 1, 2, 3 )"
+},{
+  "id":"M07",
+  "type":"formula-division",
+  "query":"M07n/L04"
+},{
+  "id":"M08n",
+  "type":"formula-concatenator",
+  "query":"L04 :: AND p808 IN ( 1, 2, 3, 4, 5 )"
+},{
+  "id":"M08",
+  "type":"formula-division",
+  "query":"M08n/L04"
+},{
+  "id":"M10n",
+  "type":"formula-concatenator",
+  "query":"F10 :: AND p413 IN ( 1, 2 )"
+},{
+  "id":"M10",
+  "type":"formula-division",
+  "query":"M10n/F10"
+},{
+  "id":"M11n",
+  "type":"formula-concatenator",
+  "query":"F11 :: AND p413 IN ( 1, 2 )"
+},{
+  "id":"M11",
+  "type":"formula-division",
+  "query":"M11n/F11"
+},{
+  "id":"M12n",
+  "type":"formula-concatenator",
+  "query":"F11 :: AND p413 IN ( 1, 2 ) AND p1101 >= _begAbc_"
+},{
+  "id":"M12",
+  "type":"formula-division",
+  "query":"M12n/F11"
+},{
+  "id":"M13n",
+  "type":"formula-concatenator",
+  "query":"F11 :: AND p413 IN ( 1, 2 ) AND p1100 >= _begAbc_"
+},{
+  "id":"M13",
+  "type":"formula-division",
+  "query":"M13n/F11"
+},{
+  "id":"M14n",
+  "type":"formula-concatenator",
+  "query":"F11 :: AND p413 IN ( 1, 2 ) AND p1103 >= _begAbc_"
+},{
+  "id":"M14",
+  "type":"formula-division",
+  "query":"M14n/F11"
+},{
+  "id":"M16n",
+  "type":"formula-concatenator",
+  "query":"L04 :: AND ( p1000 _inn_ OR p1001 _inn_ )"
+},{
+  "id":"M16",
+  "type":"formula-division",
+  "query":"M16n/L04"
+},{
+  "id":"M17n",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1102 _inn_"
+},{
+  "id":"M17",
+  "type":"formula-division",
+  "query":"M17n/L16"
+},{
+  "id":"M18n",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1104 _inn_"
+},{
+  "id":"M18",
+  "type":"formula-division",
+  "query":"M18n/L16"
+},{
+  "id":"M19n",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1105 _inn_"
+},{
+  "id":"M19",
+  "type":"formula-division",
+  "query":"M19n/L16"
+},{
+  "id":"M20n",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1103 _inn_"
+},{
+  "id":"M20",
+  "type":"formula-division",
+  "query":"M20n/L16"
+},{
+  "id":"M21n",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1112 _inn_"
+},{
+  "id":"M21",
+  "type":"formula-division",
+  "query":"M21n/L16"
+},{
+  "id":"M22n",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1107 _inn_"
+},{
+  "id":"M22",
+  "type":"formula-division",
+  "query":"M22n/L16"
+},{
+  "id":"M23n",
+  "type":"formula-concatenator",
+  "query":"L16 :: AND p1113 _inn_"
+},{
+  "id":"M23",
+  "type":"formula-division",
+  "query":"M23n/L16"
+},{
+  "id":"M24n",
+  "type":"formula-concatenator",
+  "query":"L04 :: AND p1201 _inn_"
+},{
+  "id":"M24",
+  "type":"formula-division",
+  "query":"M24n/L04"
+},{
+  "id":"M28",
+  "type":"formula-division",
+  "query":"L26/L27"
+},{
+  "id":"M29",
+  "type":"median",
+  "query":"_swfIw_ p918 = 1 AND p413 IN ( 1, 2 ) AND p1704 > 0 AND p1704 < 999999.99 AND p901 >= _begExit2q_ AND p901 <= _endExit2q_ AND p923 = 00"
+},{
+  "id":"M32",
+  "type":"formula-division",
+  "query":"L30/L31"
+}]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

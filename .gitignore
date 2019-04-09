@@ -1,0 +1,9 @@
+.DS_Store
+.idea
+.svn
+data-notes.txt
+parquet-log.txt
+query-log.txt
+target/*
+project/*
+/src/main/resources/dev-application.properties

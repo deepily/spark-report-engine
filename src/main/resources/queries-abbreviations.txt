@@ -1,0 +1,32 @@
+// NOTE: spaces are part of the delimter " = "
+
+// counts: simple count
+_scfIw_ = SELECT count( * ) AS count FROM input WHERE
+
+// counts: group by count
+_sgbcfIw_ = SELECT count( * ) AS count, p3000 AS subset FROM input WHERE
+
+// medians: all
+_swfIw_ = SELECT p1704 AS values FROM input WHERE
+
+// medians: by subset
+_sgbwfIw_ = SELECT p1704 AS values, p3000 AS subset FROM input WHERE
+
+// '_Group By Median Suffix_'
+_gbMs_ = AND p3000 _inn_ ORDER BY p3000
+
+// '_Group By Counts Suffix_'
+_gbCs_ = AND p3000 _inn_ GROUP BY p3000 ORDER BY p3000
+
+// nullness or lack thereof...
+_inn_ = IS NOT NULL
+_in_ = IS NULL
+
+// hard coded dates for now
+// _borp_ = Beginning of Report Period
+// MOVED: To extractStartAndEndDates
+// _borp_ = to_date( '2017-10-01' )
+
+// _eorp_ = END of Report Period
+// MOVED: To extractStartAndEndDates
+// _eorp_ = to_date( '2018-09-30' )

@@ -1,8 +1,8 @@
 // expected results for s://ricks-foo-bucket/wioa-wpma/19M-repartitioned-128.parquet, also works for Tom's
 // s3://wips-dev-redshift-ready/spra/13/allrows (which is source for repartitioned parquet above)
-// TODO: contains 'PIRL 3000' leakage into the dynamically compiled subsets list, they're ignored by comparison algorithm
+// TODO: contains 'PIRL 3000' leakage into the dynamically compiled subsets list. They're ignored by comparison algorithm
 // and have been filtered out from subsets list.  Shouldn't be showing up again in the output, nor in expected values lists
-// compiled based on output.
+// based on output.
 F04-ALL = 4287743
 F04-AK = 17341
 F04-AL = 87703

@@ -1,14 +1,10 @@
 package gov.doleta.wips
 
 import java.sql.DriverManager
-import java.io._
 import java.nio.file.{Files, Paths}
 import java.util.{Base64, Calendar, Collections, Date, Properties}
-import java.text.SimpleDateFormat
-import java.text.NumberFormat
-import java.io.BufferedReader
-import java.io.InputStream
-import java.io.InputStreamReader
+import java.text.{SimpleDateFormat, NumberFormat }
+import java.io.{ File, FileWriter, InputStream, InputStreamReader, BufferedReader, BufferedWriter }
 import java.nio.ByteBuffer
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.ThreadLocalRandom
@@ -28,7 +24,7 @@ import com.amazonaws.services.kms.model.DecryptRequest
 
 class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
 
-  /** START Global declarations */
+  /** START Global declarations --------------------------------------------------------------------------------------- */
   // Runtime flags
   private var debugging = true
   private var verbose = false
@@ -39,9 +35,9 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
   // once we have global args ref assigned, update the boolean flags above
   updateGlobalFlags()
 
-  private val startMillis = System.currentTimeMillis()
-  private val appName = an
-  private var spark = ss
+  private val startMillis               = System.currentTimeMillis()
+  private val appName                   = an
+  private var spark                     = ss
   private val rawQueryMap               = Map[ String, ( Any, Any ) ]()
   private var generatedQueriesMap       = Map[ String, String ]().withDefaultValue( "" )
   private var resultsMap                = Map[ String, Any ]().withDefaultValue( "" )
@@ -52,7 +48,6 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
   private var dateColumnNamesList       = ListBuffer[ String ]()
   private var staticRunList             = ListBuffer[ String ]()
   private var staticNationalMediansList = ListBuffer[ String ]()
-  // Subsets (states) pulled from Tom's email on metadata
   private var subsetsList               = Array[ String ]()
 
   // Constants
@@ -71,14 +66,11 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
   private val PARTITIONS_DEFAULT   = "64"
 
 
-  // stats trackers
+  // stats tracking
   private var medianRunTime       = 0L
-  private var runCountRuleCounter = 0
-  private var       appendCounter = 0
-  /** END Global declarations */
+  /** END Global declarations ------------------------------------------------------------------------------------------*/
 
-  /**------------------------------------------------------------------------------------------------------------------*/
-  /** START init block */
+  /** START init block -------------------------------------------------------------------------------------------------*/
   def init(): Unit = {
 
     if ( debugging ) printBanner( "init() called" )
@@ -103,9 +95,9 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
   private def updateGlobalFlags(): Unit = {
 
     // all default to false
-    debugging      = argsMap.getOrElse( "debugging",       "" ) == "true"
-    verbose        = argsMap.getOrElse( "verbose",         "" ) == "true"
-    dryRun         = argsMap.getOrElse( "dry-run",         "" ) == "true"
+    debugging = argsMap.getOrElse( "debugging", "" ) == "true"
+    verbose   = argsMap.getOrElse( "verbose",   "" ) == "true"
+    dryRun    = argsMap.getOrElse( "dry-run",   "" ) == "true"
   }
   /**
     * Loads query abbreviations from local path or resource/jar, according to runtime args supplied
@@ -336,17 +328,17 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       // trim and split line
       val pair = trimmedLine.split( " = " )
       if ( pair.length == 2 ) {
-        expectedResultsMap += pair(0) -> pair(1)
+        expectedResultsMap += pair( 0 ) -> pair( 1 )
       } else {
         // allow expected values to be zero-len strings
-        expectedResultsMap += pair(0) -> ""
+        expectedResultsMap += pair( 0 ) -> ""
       }
-      if ( verbose ) println(s"Expected results pair [$trimmedLine]" )
+      if ( verbose ) println( s"Expected results pair [$trimmedLine]" )
     }
   }
   /**
     * Loads queries from local path or resource/jar, according to runtime args supplied.
-    * Also creates two separate lists: 1) All queries and 2) Only median queries
+    * Also creates two separate lists: 1 ) All queries and 2 ) Only median queries
     */
   private def loadQueryMaps(): Unit = {
 
@@ -402,7 +394,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       // load map w/ key = id and ( type, query ) tuple
       rawQueryMap += query( "id" ) -> ( query( "type" ), query( "query" ) )
 
-      // build static run list to force static depencency resolution. This is important for division calcs: G05 = G05n / F04
+      // build static run list to force static, FIFO, depencency resolution. This is important for division calcs: G05 = G05n / F04
       staticRunList += query( "id" )
 
       // TODO/KLUDGE: build national medians list too
@@ -415,15 +407,15 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     if ( debugging ) {
 
       // iterate and dump national medians list
-      printBanner("National medians list")
-      for (id <- staticNationalMediansList) {
-        println(s"Query [$id] in national medians list")
+      printBanner( "National medians list" )
+      for ( id <- staticNationalMediansList ) {
+        println( s"Query [$id] in national medians list" )
       }
     }
   }
 
   /**
-    * Loads cohorts & measures tables, either cached from s3 (faster) or live (slower) via JDBC
+    * Loads cohorts & measures tables, either cached from s3 ( faster ) or live ( slower ) via JDBC
     */
   private def loadCohortsAndMeasures(): Unit = {
 
@@ -465,12 +457,29 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       val jdbcUrl = s"jdbc:mysql://${jdbcHostname}:${jdbcPort}/${jdbcDatabase}?user=${jdbcUsername}&password=${jdbcPassword}"
       val connectionProperties = new java.util.Properties()
 
+      // TODO: Remove!
+      println( "=======================================================================" )
+      println( s"jdbcUrl      [$jdbcUrl]" )
+      println( s"jdbcUsername [$jdbcUsername]" )
+      println( s"jdbcPassword [$jdbcPassword]" )
+      println( "=======================================================================" )
+
+      println( "=======================================================================" )
+      println( s"loadCohortsAndMeasures() RDS_USERNAME [${sys.env.getOrElse( "RDS_USERNAME", "NOT FOUND" )}]" )
+      println( s"loadCohortsAndMeasures() RDS_PASSWORD [${sys.env.getOrElse( "RDS_PASSWORD", "NOT FOUND" )}]" )
+
+      println( s"loadCohortsAndMeasures()      RDS_URL [${sys.env.getOrElse( "RDS_URL", "NOT FOUND" )}]" )
+      println( s"loadCohortsAndMeasures() REDSHIFT_URL [${sys.env.getOrElse( "REDSHIFT_URL", "NOT FOUND" )}]" )
+      println( "=======================================================================" )
+
+      stopWithMessage( "Bailing" )
+
       //load the MySQL driver
       Class.forName( "com.mysql.jdbc.Driver" )
 
-      val connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword)
-      val cohorts = spark.sqlContext.read.jdbc(jdbcUrl, "PRS_Report_Cohorts", connectionProperties )
-      val measures = spark.sqlContext.read.jdbc(jdbcUrl, "PRS_Report_Measures", connectionProperties )
+      val connection = DriverManager.getConnection( jdbcUrl, jdbcUsername, jdbcPassword )
+      val cohorts = spark.sqlContext.read.jdbc( jdbcUrl, "PRS_Report_Cohorts", connectionProperties )
+      val measures = spark.sqlContext.read.jdbc( jdbcUrl, "PRS_Report_Measures", connectionProperties )
 
       cohorts.createOrReplaceTempView( "cohorts" )
       spark.table( "cohorts" ).cache
@@ -532,7 +541,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     // default to r4q
     val window = argsMap.getOrElse( "report-window", WINDOW_RQ4 ).toString
 
-    val queryAbc    = """SELECT start, end FROM periods WHERE measure = "Number Served (Reportable Individual)"     AND period = "Current" """
+    val queryAbc    = """SELECT start, end FROM periods WHERE measure = "Number Served ( Reportable Individual )"     AND period = "Current" """
     val queryExit2q = """SELECT start, end FROM periods WHERE measure = "Employment Rate Second Quarter After Exit" AND period = "Current" """
     val queryExit4q = """SELECT start, end FROM periods WHERE measure = "Employment Rate Fourth Quarter After Exit" AND period = "Current" """
 
@@ -565,9 +574,9 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     if ( window == WINDOW_CQ ) {
 
       // get end date as LocalDate
-      val date = LocalDate.parse(df.head().getString(1), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+      val date = LocalDate.parse( df.head().getString( 1 ), DateTimeFormatter.ofPattern( "yyyy-MM-dd" ) )
       // add one day, taking us to the 1st day of the next month, and *then* subtract 3 months
-      val startDate = date.plusDays(1).minusMonths(3).toString
+      val startDate = date.plusDays( 1 ).minusMonths( 3 ).toString
 
       ( startDate,                df.head().getString( 1 ) )
 
@@ -657,12 +666,12 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     preprocessedParquetDf.createOrReplaceTempView( "input" )
     spark.table( "input" ).cache
 
-    if (debugging && verbose) {
+    if ( debugging && verbose ) {
 
-      printSchema( preprocessedParquetDf, "Preprocessed input schema (.parquet)" )
+      printSchema( preprocessedParquetDf, "Preprocessed input schema ( .parquet )" )
 
-      val seconds = (System.currentTimeMillis() - startMillis) / 1000
-      println(s"Time to load preprocessed parquet input records: [$seconds]s" )
+      val seconds = ( System.currentTimeMillis() - startMillis ) / 1000
+      println( s"Time to load preprocessed parquet input records: [$seconds]s" )
     }
   }
 
@@ -672,12 +681,12 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
   private def loadPreparedCsvInput( inputPath: String, dateColumnNames: ListBuffer[ String ] ): Unit = {
 
     val startMillis = System.currentTimeMillis()
-    var inputRawReducedRenamedDf = spark.read.format( "csv" ).option( "header", "true" ).load(inputPath)
+    var inputRawReducedRenamedDf = spark.read.format( "csv" ).option( "header", "true" ).load( inputPath )
 
     // iterate and update date cols from strings to date objs
-    for (dateColumnName <- dateColumnNames) {
-      // this only promotes string values ('2018-06-13') to date objects, it doesn't reformat them.
-      inputRawReducedRenamedDf = inputRawReducedRenamedDf.withColumn(dateColumnName, to_date(col(dateColumnName), "yyyy-MM-dd" ) )
+    for ( dateColumnName <- dateColumnNames ) {
+      // this only promotes string values ( '2018-06-13' ) to date objects, it doesn't reformat them.
+      inputRawReducedRenamedDf = inputRawReducedRenamedDf.withColumn( dateColumnName, to_date( col( dateColumnName ), "yyyy-MM-dd" ) )
     }
     // TODO: This is too ad-hoc.  You can do better!
     inputRawReducedRenamedDf = adHocCastToFloat( inputRawReducedRenamedDf )
@@ -687,20 +696,20 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
 
     if ( debugging && verbose ) {
 
-      printSchema( inputRawReducedRenamedDf, "Preprocessed input schema (.csv)" )
+      printSchema( inputRawReducedRenamedDf, "Preprocessed input schema ( .csv )" )
 
-      val seconds = (System.currentTimeMillis() - startMillis) / 1000
-      println(s"Time to load preprocessed cvs input records: [$seconds]s" )
+      val seconds = ( System.currentTimeMillis() - startMillis ) / 1000
+      println( s"Time to load preprocessed cvs input records: [$seconds]s" )
     }
   }
 
   /**
-    * Helper method for loadAndPrepareInput: load production .csv file, and whittle it down to manageable size (drops ~275 columns)
+    * Helper method for loadAndPrepareInput: load production .csv file, and whittle it down to manageable size ( drops ~275 columns )
     */
   private def loadAndPrepareCsvInput( inputPath: String, dateColumnNames: ListBuffer[ String ] ): Unit = {
 
     val startMillis = System.currentTimeMillis()
-    var inputRawDf = spark.read.format( "csv" ).option( "header", "false" ).load(inputPath)
+    var inputRawDf = spark.read.format( "csv" ).option( "header", "false" ).load( inputPath )
 
     // stash it
     inputRawDf.createOrReplaceTempView( "input" )
@@ -720,7 +729,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     //val inputRawReducedDf = inputRawDf.select( columnsToKeepList.map( col ): _* )
 
     // update col names: carve 'PIRL' down to 'p'
-    val updatedColNames = columnsToKeepList.map( name => name.replace("PIRL", "p" ) )
+    val updatedColNames = columnsToKeepList.map( name => name.replace( "PIRL", "p" ) )
 
     // create new df w/ new names
     var inputRawReducedRenamedDf = inputRawDf.toDF( updatedColNames: _* )
@@ -732,23 +741,23 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     }
 
     // iterate and update date cols from strings to date objs
-    if (debugging) printBanner("= Converting strings to dates..." )
+    if ( debugging ) printBanner( "= Converting strings to dates..." )
     val colsInInputDf = inputRawReducedRenamedDf.columns
     for ( dateColumnName <- dateColumnNames ) {
 
-      if (debugging) println(s"= updating dateColumnName [$dateColumnName] to date object")
+      if ( debugging ) println( s"= updating dateColumnName [$dateColumnName] to date object" )
       // make sure cols in list of date cols are actually present before operating on them!
       if ( colsInInputDf.contains( dateColumnName ) ) {
-        inputRawReducedRenamedDf = inputRawReducedRenamedDf.withColumn( dateColumnName, to_date(col(dateColumnName), "yyyyMMdd" ) )
+        inputRawReducedRenamedDf = inputRawReducedRenamedDf.withColumn( dateColumnName, to_date( col( dateColumnName ), "yyyyMMdd" ) )
       } else {
-        if (debugging) println(s"= dateColumnName [$dateColumnName] missing from input DF")
+        if ( debugging ) println( s"= dateColumnName [$dateColumnName] missing from input DF" )
       }
     }
 
     // TODO: This is too ad-hoc.  You can do better!
     inputRawReducedRenamedDf = adHocCastToFloat( inputRawReducedRenamedDf )
 
-    // Do conditional repartitioning of massive CSV file (only after paring it down)
+    // Do conditional repartitioning of massive CSV file ( only after paring it down )
     val actualPartitions = inputRawReducedRenamedDf.rdd.partitions.size
     val requestedPartitions = argsMap.getOrElse( PARTITIONS, PARTITIONS_DEFAULT ).toString.toInt
 
@@ -757,20 +766,20 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       inputRawReducedRenamedDf = inputRawReducedRenamedDf.repartition( requestedPartitions )
     }
     // stash and cache
-    inputRawReducedRenamedDf.createOrReplaceTempView("input")
-    spark.table("input").cache
+    inputRawReducedRenamedDf.createOrReplaceTempView( "input" )
+    spark.table( "input" ).cache
 
-    if (debugging) {
+    if ( debugging ) {
 
-      printSchema( inputRawReducedRenamedDf, "Dynamically processed input schema")
+      printSchema( inputRawReducedRenamedDf, "Dynamically processed input schema" )
 
-      val seconds = (System.currentTimeMillis() - startMillis) / 1000
-      println(s"Time to load and whittle down production input records from CSV: [$seconds]s")
+      val seconds = ( System.currentTimeMillis() - startMillis ) / 1000
+      println( s"Time to load and whittle down production input records from CSV: [$seconds]s" )
     }
   }
 
   /**
-    * Helper method for loadAndPrepareInput: load production .parquet file, and whittle it down to manageable size (drops ~275 columns)
+    * Helper method for loadAndPrepareInput: load production .parquet file, and whittle it down to manageable size ( drops ~275 columns )
     * @param inputPath
     * @param dateColumnNames
     */
@@ -795,29 +804,29 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     if ( debugging ) printSchema( inputRawDf, "Headerless dataframe after SELECT statement" )
 
     // update col names: carve 'PIRL' down to 'p'
-    val updatedColNames = columnsToKeepList.map( name => name.replace("PIRL", "p" ) )
+    val updatedColNames = columnsToKeepList.map( name => name.replace( "PIRL", "p" ) )
 
     // create new df w/ new names
     var inputRawReducedRenamedDf = inputRawDf.toDF( updatedColNames: _* )
 
     // iterate and update date cols from strings to date objs
-    if (debugging) printBanner("= Converting strings to dates..." )
+    if ( debugging ) printBanner( "= Converting strings to dates..." )
     val colsInInputDf = inputRawReducedRenamedDf.columns
     for ( dateColumnName <- dateColumnNames ) {
 
-      if (debugging) println(s"= updating dateColumnName [$dateColumnName] to date object")
+      if ( debugging ) println( s"= updating dateColumnName [$dateColumnName] to date object" )
       // make sure cols in list of date cols are actually present before operating on them!
       if ( colsInInputDf.contains( dateColumnName ) ) {
-        inputRawReducedRenamedDf = inputRawReducedRenamedDf.withColumn( dateColumnName, to_date(col(dateColumnName), "yyyyMMdd" ) )
+        inputRawReducedRenamedDf = inputRawReducedRenamedDf.withColumn( dateColumnName, to_date( col( dateColumnName ), "yyyyMMdd" ) )
       } else {
-        if (debugging) println(s"= dateColumnName [$dateColumnName] missing from input DF")
+        if ( debugging ) println( s"= dateColumnName [$dateColumnName] missing from input DF" )
       }
     }
 
     // TODO: This is too ad-hoc.  You can do better!
     inputRawReducedRenamedDf = adHocCastToFloat( inputRawReducedRenamedDf )
 
-    // Do conditional repartitioning of massive CSV file (only after paring it down)
+    // Do conditional repartitioning of massive CSV file ( only after paring it down )
     val actualPartitions = inputRawReducedRenamedDf.rdd.partitions.size
     val requestedPartitions = argsMap.getOrElse( PARTITIONS, PARTITIONS_DEFAULT ).toString.toInt
 
@@ -826,21 +835,21 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       inputRawReducedRenamedDf = inputRawReducedRenamedDf.repartition( requestedPartitions )
     }
     // stash and cache
-    inputRawReducedRenamedDf.createOrReplaceTempView("input")
-    spark.table("input").cache
+    inputRawReducedRenamedDf.createOrReplaceTempView( "input" )
+    spark.table( "input" ).cache
 
-    if (debugging) {
+    if ( debugging ) {
 
       printSchema( inputRawReducedRenamedDf, "Dynamically processed input schema" )
 
-      val seconds = (System.currentTimeMillis() - startMillis) / 1000
-      println(s"Time to load and whittle down production input records from parquet file: [$seconds]s")
+      val seconds = ( System.currentTimeMillis() - startMillis ) / 1000
+      println( s"Time to load and whittle down production input records from parquet file: [$seconds]s" )
     }
   }
   /**
     * One liner to dynamically build subsets list
     */
-  private def loadDynamicQuerySubsets(colName: String ): Unit = {
+  private def loadDynamicQuerySubsets( colName: String ): Unit = {
 
     // TODO/KLUDGE: parquet 128 has 'PIRL 3000' leakage into state/subsets list.  Dunno why it's leaking, but using
     // 'LENGTH( colName ) < 3' filters it out.
@@ -855,14 +864,13 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     df.printSchema
   }
 
-  /**------------------------------------------------------------------------------------------------------------------*/
-  /** START interactive block */
+  /** START interactive block ------------------------------------------------------------------------------------------*/
   def startInteractiveMode(): Unit = {
 
     clearConsole()
 
     if ( debugging ) {
-      val seconds = (System.currentTimeMillis() - startMillis) / 1000.0
+      val seconds = ( System.currentTimeMillis() - startMillis ) / 1000.0
       println( f"Initialization of [$appName] complete in [$seconds%.1f] seconds.\n\n" )
     }
 
@@ -874,8 +882,8 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
          |============================================================================================
          | [i] init: executes init()
          | [r]  run: executes run()
-         | [s] stop: executes stop() NOTE: executes stop(...) method using last defined runList
-         | [l] (re)load query defs, abbreviations and expected results
+         | [s] stop: executes stop() NOTE: executes stop( ... ) method using last defined runList
+         | [l] ( re )load query defs, abbreviations and expected results
          |
          | [sql] Multiline input, hit ENTER twice to execute
          | [r=id,id,id] run comma delimited list of ids. Id case matters!
@@ -931,7 +939,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
           if ( debugging ) {
             val seconds = ( System.currentTimeMillis() - startMillis ) / 1000.0
             val minutes = seconds / 60.0
-            println( s"Time to run query(ies) [$seconds]s -or- [$minutes]m" )
+            println( s"Time to run query( ies ) [$seconds]s -or- [$minutes]m" )
           }
         }
         case "dr"  => {
@@ -968,7 +976,6 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
         case "q"   => stopWithMessage( "Quitting cold" )
         case _     => println( "Unrecognized input.  Try again" )
       }
-
       // force a pause until ENTER key is hit...
       StdIn.readLine( hitEnter )
       clearConsole()
@@ -978,18 +985,18 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
   /**
     * Wraps calls to both aggregation types so we can run both in one session
     */
-  private def runCalculationsConditionally(runList: Array[ String ] ): Unit = {
+  private def runCalculationsConditionally( runList: Array[ String ] ): Unit = {
 
     // Run both? Defaults to false
     if ( argsMap.getOrElse( "run-both-aggregations", "false" ) == "true" ) {
 
-      printBanner("Run Both: Subsets")
+      printBanner( "Run Both: Subsets" )
       argsMap += "aggregate-by" -> SUBSETS
-      run(runList)
+      run( runList )
 
-      printBanner("Run Both: National")
+      printBanner( "Run Both: National" )
       argsMap += "aggregate-by" -> NATIONAL
-      run(runList)
+      run( runList )
 
     } else {
 
@@ -1043,19 +1050,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
   private def resetCounters(): Unit = {
 
     medianRunTime = 0L
-    runCountRuleCounter = 0
-    appendCounter = 0
   }
-
-//  /**
-//    * Helper method for startInteractiveMode
-//    */
-//  private def printCounters(): Unit = {
-//
-//    println( s"Stats: runCountRuleCounter: [$runCountRuleCounter], appendCounter: [$appendCounter]" )//, updateCounter: [$updateCounter]" )
-//  }
-
-
   /**
     * Helper method for startInteractiveMode
     */
@@ -1087,7 +1082,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     if ( pair.length == 2 ) {
 
       println( s"Updating [${pair( 0 )}=${pair( 1 )}]" )
-      argsMap += pair(0) -> pair(1)
+      argsMap += pair( 0 ) -> pair( 1 )
 
       // always update globals
       updateGlobalFlags()
@@ -1162,10 +1157,10 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     // iterate the keys list and call appropriate wrapper
     for ( id <- runList ) {
 
-      // check to see if key=query pair exists (users can enter invalid cellIds when in interactive mode
+      // check to see if key=query pair exists ( users can enter invalid cellIds when in interactive mode
       if ( rawQueryMap.contains( id ) ) {
 
-        val queryObj = rawQueryMap(id)
+        val queryObj = rawQueryMap( id )
         val queryType = queryObj._1
         val query = queryObj._2.toString
 
@@ -1188,7 +1183,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
 
   /**
     * Kludgey method for running national medians when in subsets mode.  Artifact of desigining engine to create two
-    * types of report: 1) National and 2) Subsets.  Once requirement changed to do both in one run I switched to getting
+    * types of report: 1 ) National and 2 ) Subsets.  Once requirement changed to do both in one run I switched to getting
     * all national counts as cummulative rollup byproduct of iterating results for subsets.
     *
     * That approach words for *ALL BUT* national medians, hence this kludge
@@ -1202,7 +1197,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     for ( id <- runList ) {
 
 
-      val queryObj = rawQueryMap(id)
+      val queryObj = rawQueryMap( id )
       val query = queryObj._2.toString
 
       updateResultsMap( id, runMedianCountRule( query, id ) )
@@ -1211,7 +1206,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
 
   // allows calling objec to get count of records in dataset
   def getInputCount(): Long = {
-    return spark.sql( "SELECT count( * ) AS count FROM input" ).first()(0).asInstanceOf[Long]
+    return spark.sql( "SELECT count( * ) AS count FROM input" ).first()( 0 ).asInstanceOf[Long]
   }
 
   /**
@@ -1232,14 +1227,14 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
   /**
     * Helper method for run().  Stores numerator and denominator in a tuple
     */
-  private def updateDivisorsMap( id: String, value: ( String, String ) ): Unit = {
-    divisorsMap += id -> value
+  private def updateDivisorsMap( id: String, values: ( String, String ) ): Unit = {
+    divisorsMap += id -> values
   }
 
   /**
     * Helper method for run().
     */
-  private def runCountWrapper(query: String, id: String ): Unit = {
+  private def runCountWrapper( query: String, id: String ): Unit = {
 
     if ( debugging && verbose ) println( s"runCountWrapper called raw query [$query]" )
     try {
@@ -1253,10 +1248,10 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       } else if ( argsMap.getOrElse( "aggregate-by", SUBSETS ) == SUBSETS ) {
 
         // build group by query
-        // 1) Swap prefixes: replace count w/ group by setup, and attach group by conditions suffix
+        // 1 ) Swap prefixes: replace count w/ group by setup, and attach group by conditions suffix
         var groupByQuery = query.replaceAll( "_scfIw_", "_sgbcfIw_" ) + " _gbCs_"
 
-        // 2) Replace other placeholders
+        // 2 ) Replace other placeholders
         groupByQuery = replaceAbbrevations( groupByQuery )
 
         // keep a copy of the query for reporting purposes:  once per group in the 1st subset's compound key
@@ -1309,7 +1304,6 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     }
     // Now, iterate states list, query map for value, and update results cache
     // Also: Track rollup total, obviating need for national iteration.  Should save ~20% at runtime
-    // TODO: Keep or toss?
     var rollupCount = 0
     for ( subset <- subsetsList ) {
 
@@ -1339,7 +1333,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
 
         // TODO: Remove this switch!
         //if ( argsMap.getOrElse( "skip-medians", "" ) != "true" ) {
-          runMedianSubsetsRule(query, id)
+          runMedianSubsetsRule( query, id )
         //}
       } else {
 
@@ -1360,7 +1354,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     * @param id
     * @return
     */
-  private def runMedianCountRule(query: String, id: String ): String = {
+  private def runMedianCountRule( query: String, id: String ): String = {
 
     // NOTE: when no results are returned, then 'indefined' string is returned... As it should be!
 
@@ -1376,10 +1370,10 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
 
       val valuesDf = spark.sql( updatedQueryString )
 
-      if (valuesDf.count > 0) {
+      if ( valuesDf.count > 0 ) {
 
         // this is faster by ~100ms
-        val collectedFloats: Array[Float] = valuesDf.rdd.map(row => row.getFloat(0)).collect()
+        val collectedFloats: Array[Float] = valuesDf.rdd.map( row => row.getFloat( 0 ) ).collect()
         // ...than this method recommended on: https://stackoverflow.com/questions/32000646/extract-column-values-of-dataframe-as-list-in-apache-spark#
         //val colledArray: Array[ String ] = rule.select( "values" ).map( r => r.getString( 0 ) ).collect
 
@@ -1389,10 +1383,10 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
 
         result = UNDEFINED
       }
-      if (debugging) {
+      if ( debugging ) {
         val millis = System.currentTimeMillis() - startMillis
         medianRunTime += millis
-        println(s"Time to sort and calculate median [$millis]ms")
+        println( s"Time to sort and calculate median [$millis]ms" )
       }
     }
     // done!
@@ -1413,7 +1407,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     // 0 grab subsetName
     val subsetName = argsMap.getOrElse( "subsets-name", "p3000" ).toString
 
-    // 1) Replace other placeholders
+    // 1 ) Replace other placeholders
     var queryStem = replaceAbbrevations( query )
     if ( debugging && verbose ) printBanner( s"Medians query [$queryStem]" )
 
@@ -1423,9 +1417,9 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     // run query and collect all medians...
     if ( !dryRun ) {
 
-      for (subset <- subsetsList) {
+      for ( subset <- subsetsList ) {
 
-        // TODO: *DO NOT* sort on workers ('ORDER BY'), it's easier to filter on workers, and then sort here, on driver
+        // TODO: *DO NOT* sort on workers ( 'ORDER BY' ), it's easier to filter on workers, and then sort here, on driver
         // before calculating the median.  It's *MUCH* faster to sort locally: 11x times faster!
         val fullQuery = s"""$queryStem AND $subsetName = '$subset'"""// ORDER BY $sortByName"""
         if ( debugging ) println( s"median query for [$subset] [$fullQuery]" )
@@ -1444,14 +1438,14 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
         if ( debugging ) println( s"median for [$subset] = [$median]" )
         updateResultsMap( id + "-" + subset, median.toString )
       }
-      if (debugging) {
+      if ( debugging ) {
 
         val millis = System.currentTimeMillis() - startMillis
         medianRunTime += millis
 
         val seconds = millis / 1000.0
         val meanCalcTime = seconds / subsetsList.length
-        println(s"Time to calculate [${subsetsList.length}] medians: [${seconds}]s mean s/subset [$meanCalcTime]")
+        println( s"Time to calculate [${subsetsList.length}] medians: [${seconds}]s mean s/subset [$meanCalcTime]" )
       }
     }
   }
@@ -1509,7 +1503,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       var denIdSubset   = ""
       var cellSubsetKey = ""
 
-      for (subset <- subsetsList ) {
+      for ( subset <- subsetsList ) {
 
         numIdSubset   = numId + "-" + subset
         denIdSubset   = denId + "-" + subset
@@ -1542,18 +1536,18 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       if ( isDoubleable( num ) && isDoubleable( den ) ) {
 
         val ratio = doSafeDivision( num.toDouble, den.toDouble )
-        if (debugging) println(s"cell [$id] contains [$num]/[$den] = [$ratio]")
+        if ( debugging ) println( s"cell [$id] contains [$num]/[$den] = [$ratio]" )
         updateResultsMap( id, ratio )
         updateDivisorsMap( id, ( num, den ) )
 
       } else {
 
-        if (debugging) println(s"runDivisionWrapper FAILED: num [$num], den [$den]")
-        updateResultsMap(id, "FAILED")
+        if ( debugging ) println( s"runDivisionWrapper FAILED: num [$num], den [$den]" )
+        updateResultsMap( id, "FAILED" )
 
-        if (argsMap.getOrElse("stop-on-division-error", "").toString == "true") {
+        if ( argsMap.getOrElse( "stop-on-division-error", "" ).toString == "true" ) {
           printResultsMap()
-          stopWithMessage("runDivisionWrapper FAILED" )
+          stopWithMessage( "runDivisionWrapper FAILED" )
         }
       }
     }
@@ -1569,17 +1563,17 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
 
     // format: CellNumber|filterString, e.g.: F5 :: AND ( foo > 5 OR bar < 0 )
     var pair = idAndFilterString.trim.split( " :: " )
-    var prefixId = pair(0).trim
-    var filterString = pair(1).trim
+    var prefixId = pair( 0 ).trim
+    var filterString = pair( 1 ).trim
 
-    if ( debugging && verbose ) println(s"Args for idAndFilterString: [$prefixId] [$filterString]" )
+    if ( debugging && verbose ) println( s"Args for idAndFilterString: [$prefixId] [$filterString]" )
 
-    // prepare to get parent query(ies)...
+    // prepare to get parent query( ies )...
     var queryType = FORMULA_CONCATENATOR
     var query = ""
     var queryAccumulator = ""
 
-    // 1) ...get parent prefixes...
+    // 1 ) ...get parent prefixes...
     while ( queryType == FORMULA_CONCATENATOR ) {
 
       if ( debugging && verbose ) println( s"Querying for prefix by prefixId [$prefixId]..." )
@@ -1598,8 +1592,8 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       queryAccumulator = query + " " + queryAccumulator
     }
 
-    // 2) ...prepend them to filter, removing excess spaces that may have crept in
-    query = ( queryAccumulator + " " + filterString ).replaceAll("\\s{2,}"," " )
+    // 2 ) ...prepend them to filter, removing excess spaces that may have crept in
+    query = ( queryAccumulator + " " + filterString ).replaceAll( "\\s{2,}"," " )
 
     if ( debugging && verbose ) {
       println( s"[$id] prepended queryAccumulator [$queryAccumulator] to filter [$filterString]" )
@@ -1647,7 +1641,6 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     */
   private def runCountRule( queryString: String, id: String ): Long = {
 
-    runCountRuleCounter += 1
     val startMillis = System.currentTimeMillis()
     val updatedQueryString = replaceAbbrevations( queryString )
     var count = -1L
@@ -1662,19 +1655,19 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     } else {
 
       var countDf = spark.sql( updatedQueryString )
-      count = countDf.select( "count" ).first()(0).asInstanceOf[Long]
+      count = countDf.select( "count" ).first()( 0 ).asInstanceOf[Long]
 
-      if (debugging && verbose) {
-        println(s"queryString [$updatedQueryString]" )
-        println(s"count: [$count]" )
+      if ( debugging && verbose ) {
+        println( s"queryString [$updatedQueryString]" )
+        println( s"count: [$count]" )
       }
-      if (debugging) println( s"RunCountRule called [$runCountRuleCounter] time(s) Time to run [$id]: [${System.currentTimeMillis() - startMillis}]ms" )
+      if ( debugging ) println( s"RunCountRule called, time to run [$id]: [${System.currentTimeMillis() - startMillis}]ms" )
     }
     count
   }
 
   /**
-    * Replaces all _some_ placeholder abbreviations in query string w/ their decompressed versions
+    * Replaces all "_some_" placeholder abbreviations in query string w/ their decompressed versions
     * @param queryString
     * @return
     */
@@ -1692,7 +1685,6 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       key = pair( 0 )
       value = pair( 1 )
 
-      //if ( debugging && verbose ) println( s"Searching for [$key], replacing with [$value]" )
       updatedQueryString = updatedQueryString.replaceAll( key, value )
     }
     updatedQueryString
@@ -1724,8 +1716,8 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     processResults()
 
     if ( debugging ) {
-      val minutes = (System.currentTimeMillis() - startMillis) / 1000.0 / 60.0
-      println(f"RUN $appName complete in [$minutes%.1f] minutes.\n\n" )
+      val minutes = ( System.currentTimeMillis() - startMillis ) / 1000.0 / 60.0
+      println( f"RUN $appName complete in [$minutes%.1f] minutes.\n\n" )
     }
   }
 
@@ -1764,7 +1756,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     printBanner( "printSubsetsList" )
 
     // dump as sorted list of keys = values
-    for (subsets <- subsetsList ) {
+    for ( subsets <- subsetsList ) {
       println( s"subsets [$subsets]" )
     }
   }
@@ -1773,16 +1765,16 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     */
   private def printResultsMap(): Unit = {
 
-    printBanner( "printResultsMap (resultsMap)" )
+    printBanner( "printResultsMap ( resultsMap )" )
 
     for ( key <- resultsMap.keys.toArray.sorted ) {
 
       // two formats: long for when num and den are present...
       if ( divisorsMap.contains( key ) ) {
-        println(s"key [$key] result [${resultsMap(key)}] = [${divisorsMap.getOrElse(key, ("NA", ""))._1}/${divisorsMap.getOrElse(key, ("", "NA"))._2}]")
+        println( s"key [$key] result [${resultsMap( key )}] = [${divisorsMap.getOrElse( key, ( "NA", "" ) )._1}/${divisorsMap.getOrElse( key, ( "", "NA" ) )._2}]" )
       } else {
         // ...and short when it's a simple count
-        println(s"key [$key] result [${resultsMap(key)}]")
+        println( s"key [$key] result [${resultsMap( key )}]" )
       }
     }
   }
@@ -1837,8 +1829,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     }
   }
   /**
-    * Compares actual w/ expected results.  Dumps results and summary to console and local file system (debugging)
-    * or to console and s3 bucket (batch)
+    * Compares actual w/ expected results.  Dumps results and summary to console, local file system and/or s3 bucket
     */
   private def processResults(): Unit = {
 
@@ -1871,20 +1862,20 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       num = getNumericOrNothing( divisorsMap( cellId )._1 )
       den = getNumericOrNothing( divisorsMap( cellId )._2 )
 
-      query = generatedQueriesMap.getOrElse( cellId, s"See 1st subset query above").toString
+      query = generatedQueriesMap.getOrElse( cellId, s"See 1st subset query above" ).toString
 
       // Compare results: Start w/ least common cases: missing values
       if ( expected == "" && actual == "" ) {
 
         missing += 1
         comparison = ( id, subset, "", "", "", "MISSING", "MISSING", "false", query )
-        if ( showMissing ) println(s"Query id-subset: [$id]-[$subset] Expected [MISSING] == Actual: [MISSING] [false]" )
+        if ( showMissing ) println( s"Query id-subset: [$id]-[$subset] Expected [MISSING] == Actual: [MISSING] [false]" )
 
       } else if ( expected == "" ) {
 
         missing += 1
         comparison = ( id, subset, getNumericOrNothing( actual ), num, den, "MISSING", actual, "false", query )
-        if ( showMissing ) println(s"Query id-subset: [$id]-[$subset] Expected [MISSING] == Actual: [$actual] [false]" )
+        if ( showMissing ) println( s"Query id-subset: [$id]-[$subset] Expected [MISSING] == Actual: [$actual] [false]" )
 
       } else if ( actual == "" ) {
 
@@ -1920,7 +1911,8 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
     }
   }
 
-  /*** Kludgey little helper method for processResults(...).  Depending on aggregationType, breaks out hyphenated key bits
+  /**
+    * Kludgey little helper method for processResults( ... ).  Depending on aggregationType, breaks out hyphenated key bits
     * when they are present: id1-id2, otherwise returns id1, id2 = ALL
     * @param id
     * @param aggregationType
@@ -1959,24 +1951,24 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       val localResultsPath = getUniqueResultsPath( getLocalResultsPath() )
 
       val file = new File( localResultsPath )
-      val bw = new BufferedWriter(new FileWriter(file))
+      val bw = new BufferedWriter( new FileWriter( file ) )
 
-      if (debugging) println(s"Writing local results to [${file.toString}]")
+      if ( debugging ) println( s"Writing local results to [${file.toString}]" )
 
       try {
 
         // write header first
-        bw.write("cell,subset,value,numerator,denominator,expected,actual,match,query\n")
+        bw.write( "cell, subset, value, numerator, denominator, expected, actual, match, query\n" )
 
         // write all comparisons
-        for (comparison <- comparisons) {
+        for ( comparison <- comparisons ) {
 
           // convert tuple into string: https://stackoverflow.com/questions/26751441/scala-tuple-to-string
-          bw.write(comparison.productIterator.mkString(",") + "\n")
+          bw.write( comparison.productIterator.mkString( "," ) + "\n" )
         }
       } catch {
 
-        case ex: Exception => println(s"ERROR writing to [$localResultsPath]: [$ex.toString]")
+        case ex: Exception => println( s"ERROR writing to [$localResultsPath]: [$ex.toString]" )
 
       } finally {
 
@@ -1997,7 +1989,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       val quarterID  = argsMap.getOrElse( "quarter-id",    QUARTER_ID )
 
       val s3path = getUniqueResultsPath( argsMap.get( "s3-output" ).get.toString + "-" + resultsType + "-" + windowType + "-" + quarterID )
-      if (debugging) println(s"Writing results to [$s3path]")
+      if ( debugging ) println( s"Writing results to [$s3path]" )
 
       // Hah! https://stackoverflow.com/questions/44094108/not-able-to-import-spark-implicits-in-scalatest#44094228
       val sparkToo = spark // sparkToo *MUST* be val, never var!
@@ -2008,7 +2000,7 @@ class WioaWpmaReport( ss: SparkSession, am: Map[ String, Any ], an: String ) {
       comparisons.toSeq.toDF( "cell", "subset", "value", "numerator", "denominator", "expected", "actual", "match", "query" ).coalesce( 1 ).write.option( "header", "true" ).csv( s3path )
 
       if ( debugging ) {
-        println( s"Time to write results to S3 [${System.currentTimeMillis() - startMillis}]ms")
+        println( s"Time to write results to S3 [${System.currentTimeMillis() - startMillis}]ms" )
         println( s"s3path  [$s3path]" )
       }
     }
@@ -2067,23 +2059,23 @@ object WioaWpmaReport {
 
     // timing conversion of 19M rows of CSV into parquet
     if ( 0 == 1 ) {
-      val spark = SparkSession.builder.appName("Repartitioner").getOrCreate()
+      val spark = SparkSession.builder.appName( "Repartitioner" ).getOrCreate()
 
-      val df = spark.read.format("csv").option("header", "false").load("s3://wips-dev-redshift-ready/spra/13/allrows").cache
+      val df = spark.read.format( "csv" ).option( "header", "false" ).load( "s3://wips-dev-redshift-ready/spra/13/allrows" ).cache
 
       var counter = 4
-      while (counter <= 128) {
+      while ( counter <= 128 ) {
 
-        println("==========================================================================================")
-        println(s"Counter [$counter]")
-        println("==========================================================================================")
+        println( "==========================================================================================" )
+        println( s"Counter [$counter]" )
+        println( "==========================================================================================" )
 
         var startMillis = System.currentTimeMillis()
 
         // write w/ n partitions
         val s3path = s"s3://ricks-foo-bucket/wioa-wpma/19M-repartitioned-$counter"
-        val newDf = df.repartition(counter).cache
-        println(s"Time to create [$counter] partitions [${(System.currentTimeMillis() - startMillis) / 1000.0 / 60.0}]m")
+        val newDf = df.repartition( counter ).cache
+        println( s"Time to create [$counter] partitions [${( System.currentTimeMillis() - startMillis ) / 1000.0 / 60.0}]m" )
 
         //      // write as csv
         //      startMillis = System.currentTimeMillis()
@@ -2092,12 +2084,21 @@ object WioaWpmaReport {
 
         // write as parquet
         startMillis = System.currentTimeMillis()
-        newDf.write.parquet(s3path + ".parquet")
-        println(s"Time to write [$counter] partitions as parquet [${(System.currentTimeMillis() - startMillis) / 1000.0 / 60.0}]m")
+        newDf.write.parquet( s3path + ".parquet" )
+        println( s"Time to write [$counter] partitions as parquet [${( System.currentTimeMillis() - startMillis ) / 1000.0 / 60.0}]m" )
 
         counter = counter * 2
       }
     }
+
+    // TODO: Remove!
+    println( "=======================================================================" )
+    println( s"main() RDS_USERNAME [${sys.env.getOrElse( "RDS_USERNAME", "NOT FOUND" )}]" )
+    println( s"main() RDS_PASSWORD [${sys.env.getOrElse( "RDS_PASSWORD", "NOT FOUND" )}]" )
+
+    println( s"main()      RDS_URL [${sys.env.getOrElse( "RDS_URL", "NOT FOUND" )}]" )
+    println( s"main() REDSHIFT_URL [${sys.env.getOrElse( "REDSHIFT_URL", "NOT FOUND" )}]" )
+    println( "=======================================================================" )
 
     val startMillis = System.currentTimeMillis()
 
@@ -2109,9 +2110,9 @@ object WioaWpmaReport {
 
     // start and force to run on one partition. Defaults to distributed
     if ( argsMap.getOrElse( "driver-only", "" ) == "true" ) {
-      spark = SparkSession.builder.master("local[1]").appName(appName).getOrCreate()
+      spark = SparkSession.builder.master( "local[1]" ).appName( appName ).getOrCreate()
     } else {
-      spark = SparkSession.builder.appName(appName).getOrCreate()
+      spark = SparkSession.builder.appName( appName ).getOrCreate()
     }
 
     val reportEngine = new WioaWpmaReport( spark, argsMap, appName )
@@ -2125,7 +2126,7 @@ object WioaWpmaReport {
     if ( batch || ( interactive && runInit ) ) {
       reportEngine.init()
     }
-    // are we in interactive or batch (default) mode?
+    // are we in interactive or batch ( default ) mode?
     if ( interactive ) {
 
       reportEngine.startInteractiveMode()
@@ -2140,7 +2141,7 @@ object WioaWpmaReport {
 
       reportEngine.stop()
 
-      runStats( appName, argsMap, rows, startMillis, spark, reportEngine )
+      calculateRuntimeStats( appName, argsMap, rows, startMillis, spark, reportEngine )
     }
   }
   /**
@@ -2150,9 +2151,9 @@ object WioaWpmaReport {
   def loadArgumentsMap( args: Array[ String ] ): Map[ String, Any ] = {
 
     if ( debugging ) {
-      println("\n\n===================================================")
-      println("= loadArgumentsMap called...")
-      println("===================================================")
+      println( "\n\n===================================================" )
+      println( "= loadArgumentsMap called..." )
+      println( "===================================================" )
     }
     var name = ""
     var value = ""
@@ -2161,9 +2162,9 @@ object WioaWpmaReport {
 
       // quick sanity check: Does arg have 'name=value' format?
       if ( arg.split( "=" ).length == 1 ) {
-        println( "\n\n===================================================")
+        println( "\n\n===================================================" )
         println( s"= args missing value: [$arg]" )
-        println( "===================================================")
+        println( "===================================================" )
         System.exit( -1 )
       }
       name = arg.split( "=" )( 0 )
@@ -2184,15 +2185,15 @@ object WioaWpmaReport {
   }
 
   /**
-    * Helper method for main(...) Calculates runtime performance stats
+    * Helper method for main( ... ) Calculates runtime performance stats
     * @param startMillis
     * @param spark
     * @param reportEngine
     */
-  def runStats( appName: String, argsMap: Map[ String, Any ], rows: Long, startMillis: Long, spark: SparkSession, reportEngine: WioaWpmaReport ): Unit = {
+  def calculateRuntimeStats( appName: String, argsMap: Map[ String, Any ], rows: Long, startMillis: Long, spark: SparkSession, reportEngine: WioaWpmaReport ): Unit = {
 
     val commaFormatter = NumberFormat.getIntegerInstance
-    val seconds = ( System.currentTimeMillis() - startMillis) / 1000.0
+    val seconds = ( System.currentTimeMillis() - startMillis ) / 1000.0
     val minutes = ( seconds / 60.0 )
     val rowsPerSecond = rows / seconds
     val kRowsPerSecond = rowsPerSecond / 1000.0
@@ -2204,12 +2205,12 @@ object WioaWpmaReport {
     val calcsPerSecB = totalCalcsB / seconds
 
     // print stats
-    println("\n\n===================================================")
+    println( "\n\n===================================================" )
     println( s"= [$appName] run completed" )
-    println("===================================================")
+    println( "===================================================" )
     println( f"Input [${argsMap.getOrElse( "input", "" )}]" )
     println( f"Partitions requested [$partitionsRequested] vs. actual/created [$partitionsActual]" )
     println( f"Calcs finished in [$minutes%.1f] minutes @ rate of [$kRowsPerSecond%.1f]K rows/sec" )
-    println( f"[$totalCalcsB%.1f] Billion(s) of calcs = [${commaFormatter.format( cellCalcsCount ) }] (queries * subsets) over [$millionsOfRows%.1f] Million(s) of rows @ rate of [$calcsPerSecB%.1f]B calcs/sec\n\n" )
+    println( f"[$totalCalcsB%.1f] Billion( s ) of calcs = [${commaFormatter.format( cellCalcsCount ) }] ( queries * subsets ) over [$millionsOfRows%.1f] Million( s ) of rows @ rate of [$calcsPerSecB%.1f]B calcs/sec\n\n" )
   }
 }
